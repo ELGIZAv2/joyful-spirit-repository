@@ -30,26 +30,61 @@ export default function DataTab() {
     toast.success("Archived");
   };
 
-  if (!isAdmin) return <p className="text-sm text-muted-foreground">Only admins can manage data & privacy.</p>;
+  if (!isAdmin) {
+    return (
+      <div className="space-y-8 animate-fade-in">
+        <div>
+          <h2 className="text-[22px] font-semibold tracking-tight text-foreground">Data & privacy</h2>
+          <p className="text-[13px] text-muted-foreground mt-1">Only workspace admins can manage data and archival.</p>
+        </div>
+        <div className="p-10 rounded-2xl border border-dashed border-border/60 bg-card/40 text-center">
+          <Database className="w-5 h-5 text-muted-foreground/60 mx-auto mb-2" />
+          <p className="text-[13px] text-muted-foreground">Restricted to admins.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2"><Database className="w-4 h-4" /><h3 className="text-sm font-semibold">Data & privacy</h3></div>
+    <div className="space-y-10 animate-fade-in">
+      <div>
+        <h2 className="text-[22px] font-semibold tracking-tight text-foreground">Data & privacy</h2>
+        <p className="text-[13px] text-muted-foreground mt-1">Export workspace data or archive the workspace.</p>
+      </div>
 
-      <div className="p-4 rounded-xl border border-border/60 bg-card">
-        <p className="text-sm font-medium">GDPR data export</p>
-        <p className="text-xs text-muted-foreground mt-1">Download a complete JSON of all workspace data: members, projects, usage, audit log, brand kit, settings.</p>
-        <Button onClick={exportData} disabled={exporting} className="mt-3">
-          {exporting ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Download className="w-4 h-4 mr-1" />}
+      <section className="p-5 rounded-2xl border border-border/60 bg-card">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-foreground/[0.04] grid place-items-center shrink-0">
+            <Download className="w-4 h-4 text-muted-foreground" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[13.5px] font-medium">GDPR data export</p>
+            <p className="text-[12px] text-muted-foreground mt-0.5">Download a complete JSON: members, projects, usage, audit log, brand kit, settings.</p>
+          </div>
+        </div>
+        <Button onClick={exportData} disabled={exporting} className="mt-4 rounded-lg h-9">
+          {exporting ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Download className="w-3.5 h-3.5 mr-1.5" />}
           Export all data
         </Button>
-      </div>
+      </section>
 
-      <div className="p-4 rounded-xl border border-amber-500/40 bg-amber-500/5">
-        <p className="text-sm font-medium">Archive workspace</p>
-        <p className="text-xs text-muted-foreground mt-1">Hides the workspace from members. Recoverable within 30 days; permanently deleted after.</p>
-        <Button variant="outline" onClick={archive} className="mt-3"><Archive className="w-4 h-4 mr-1" /> Archive</Button>
-      </div>
+      <section className="relative p-5 rounded-2xl border border-amber-500/30 bg-card overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/[0.06] via-amber-500/0 to-transparent pointer-events-none" />
+        <div className="relative">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/10 ring-1 ring-amber-500/20 grid place-items-center shrink-0">
+              <Archive className="w-4 h-4 text-amber-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13.5px] font-medium">Archive workspace</p>
+              <p className="text-[12px] text-muted-foreground mt-0.5">Hides the workspace from members. Recoverable within 30 days; permanently deleted after.</p>
+            </div>
+          </div>
+          <Button variant="outline" onClick={archive} className="mt-4 rounded-lg h-9 border-amber-500/30 hover:bg-amber-500/10 text-amber-700 dark:text-amber-500">
+            <Archive className="w-3.5 h-3.5 mr-1.5" /> Archive workspace
+          </Button>
+        </div>
+      </section>
     </div>
   );
 }
