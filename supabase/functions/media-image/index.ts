@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
   const numImages = Math.max(1, Math.min(4, body.num_images ?? 1));
   const credits = Math.max(1, (model.credits ?? 1) * numImages);
 
-  const { data: deduct, error: deductErr } = await admin.rpc("deduct_credits", {
+  const { data: deduct, error: deductErr } = await admin.rpc("spend_credits_auto", {
     p_user_id: user.id,
     p_amount: credits,
     p_action_type: "leonardo_image_generation",
