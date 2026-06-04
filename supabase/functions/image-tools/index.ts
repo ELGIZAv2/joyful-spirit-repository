@@ -14,6 +14,7 @@
 import { falRun, extractImageUrls, FalError } from "../_shared/fal.ts";
 import { ensurePublicUrl } from "../_shared/uploadDataUrl.ts";
 import { getAuthUser } from "../_shared/auth.ts";
+import { spendCreditsServer, creditErrorResponse } from "../_shared/credits.ts";
 
 const MEDIA_FIELDS = ["image", "mask", "target", "ref", "referenceImage"] as const;
 
@@ -231,6 +232,10 @@ Deno.serve(async (req) => {
       return json({ error: `Missing required field: ${field}` }, 400);
     }
   }
+
+  // Server-side credit enforcement (1 credit per image tool call)
+  const spend = await spendCreditsServer(authUser.id, 1, `image_tools:${body.tool}`, `Image tool: ${body.tool}`);
+  if (!spend.ok) return creditErrorResponse(spend, corsHeaders);
 
   try {
     for (const f of MEDIA_FIELDS) {
