@@ -5,6 +5,7 @@
 // qwen3-coder-plus for coders).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { spendCreditsServer, creditErrorResponse } from "../_shared/credits.ts";
 
 const DASHSCOPE_URL = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions";
 const ORCH_MODEL = "qwen-max";
@@ -346,6 +347,10 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Server-side credit enforcement (squad run costs more than a single build)
+    const spend = await spendCreditsServer(user.id, 5, "code_agent_squad", "Code squad run");
+    if (!spend.ok) return creditErrorResponse(spend, corsHeaders);
 
     // Create a run row for the live multi-agent timeline
     const { data: runRow } = await sb.from("code_agent_runs").insert({
