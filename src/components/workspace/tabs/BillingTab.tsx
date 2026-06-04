@@ -51,24 +51,36 @@ export default function BillingTab() {
   };
 
   return (
-    <div className="space-y-6">
-      <section className="p-4 rounded-xl border border-border/60 bg-card">
-        <div className="flex items-center gap-2">
-          <Wallet className="w-4 h-4 text-emerald-500" />
-          <p className="text-sm font-semibold">Workspace balance</p>
+    <div className="space-y-10 animate-fade-in">
+      <div>
+        <h2 className="text-[22px] font-semibold tracking-tight text-foreground">Billing</h2>
+        <p className="text-[13px] text-muted-foreground mt-1">Credits, plans and invoices for this workspace.</p>
+      </div>
+
+      <section className="relative p-6 rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-emerald-500/0 to-transparent pointer-events-none" />
+        <div className="relative">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-background ring-1 ring-emerald-500/20 grid place-items-center">
+              <Wallet className="w-4 h-4 text-emerald-500" />
+            </div>
+            <p className="text-[12px] uppercase tracking-wider text-muted-foreground/80 font-medium">Workspace balance</p>
+          </div>
+          <p className="text-4xl font-semibold mt-3 tabular-nums tracking-tight">
+            {Number(ws.credits).toFixed(0)} <span className="text-base text-muted-foreground font-normal">MC</span>
+          </p>
         </div>
-        <p className="text-3xl font-semibold mt-2">{Number(ws.credits).toFixed(0)} <span className="text-sm text-muted-foreground">MC</span></p>
       </section>
 
       {canBilling && (
         <section className="space-y-3">
-          <h3 className="text-sm font-semibold">More credits</h3>
-          <div className="p-4 rounded-xl border border-border/60 bg-card flex items-center justify-between gap-3">
+          <h3 className="text-[14px] font-semibold tracking-tight">More credits</h3>
+          <div className="p-5 rounded-2xl border border-border/60 bg-card flex items-center justify-between gap-3 hover:border-border transition-colors">
             <div className="min-w-0">
-              <p className="text-sm font-medium">Upgrade plan</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Higher plans add more monthly credits to this workspace.</p>
+              <p className="text-[13.5px] font-medium">Upgrade plan</p>
+              <p className="text-[12px] text-muted-foreground mt-0.5">Higher plans add more monthly credits to this workspace.</p>
             </div>
-            <Button size="sm" variant="outline" onClick={() => navigate("/pricing")}>
+            <Button size="sm" variant="outline" onClick={() => navigate("/pricing")} className="rounded-lg shrink-0">
               View plans <ArrowUpRight className="w-3.5 h-3.5 ml-1" />
             </Button>
           </div>
@@ -76,30 +88,47 @@ export default function BillingTab() {
       )}
 
       {isAdmin && (
-        <section className="space-y-2">
-          <h3 className="text-sm font-semibold">Default monthly limit per member</h3>
-          <div className="flex gap-2">
-              <Input type="number" placeholder="No limit" value={defaultLimit} onChange={(e) => setDefaultLimit(e.target.value)} />
-              <Button onClick={updateDefault}>Save</Button>
+        <section className="space-y-3">
+          <h3 className="text-[14px] font-semibold tracking-tight">Default monthly limit per member</h3>
+          <div className="p-4 rounded-2xl border border-border/60 bg-card space-y-2.5">
+            <div className="flex gap-2">
+              <Input type="number" placeholder="No limit" value={defaultLimit} onChange={(e) => setDefaultLimit(e.target.value)} className="h-10 rounded-lg" />
+              <Button onClick={updateDefault} className="h-10 rounded-lg">Save</Button>
+            </div>
+            <p className="text-[11.5px] text-muted-foreground px-0.5">Applied to new members. Existing limits unchanged.</p>
           </div>
-          <p className="text-xs text-muted-foreground">Applied to new members. Existing limits unchanged.</p>
         </section>
       )}
 
-      <section className="space-y-2">
-        <h3 className="text-sm font-semibold">Invoices</h3>
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-[14px] font-semibold tracking-tight">Invoices</h3>
+          {topups.length > 0 && <span className="text-[11.5px] tabular-nums text-muted-foreground">{topups.length}</span>}
+        </div>
         {topups.length === 0 ? (
-          <p className="text-xs text-muted-foreground">No invoices yet.</p>
-        ) : topups.map(t => (
-          <div key={t.id} className="flex items-center gap-3 p-3 rounded-lg border border-border/40 bg-card">
-            <FileText className="w-4 h-4 text-muted-foreground" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium">{t.invoice_number || "—"}</p>
-              <p className="text-xs text-muted-foreground">{new Date(t.created_at).toLocaleDateString()} · {t.amount_credits} MC · ${Number(t.amount_usd).toFixed(2)} · {t.status}</p>
-            </div>
-            <Button size="sm" variant="ghost" onClick={() => downloadInvoice(t)}><Download className="w-4 h-4" /></Button>
+          <div className="p-10 rounded-2xl border border-dashed border-border/60 bg-card/40 text-center">
+            <FileText className="w-5 h-5 text-muted-foreground/60 mx-auto mb-2" />
+            <p className="text-[13px] text-muted-foreground">No invoices yet.</p>
           </div>
-        ))}
+        ) : (
+          <div className="rounded-2xl border border-border/60 bg-card divide-y divide-border/60 overflow-hidden">
+            {topups.map(t => (
+              <div key={t.id} className="flex items-center gap-3 px-4 py-3 hover:bg-foreground/[0.02] transition-colors">
+                <div className="w-9 h-9 rounded-xl bg-foreground/[0.04] grid place-items-center shrink-0">
+                  <FileText className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13.5px] font-medium truncate">{t.invoice_number || "—"}</p>
+                  <p className="text-[11.5px] text-muted-foreground mt-0.5 tabular-nums">
+                    {new Date(t.created_at).toLocaleDateString()} <span className="text-muted-foreground/40">·</span> {t.amount_credits} MC <span className="text-muted-foreground/40">·</span> ${Number(t.amount_usd).toFixed(2)}
+                  </p>
+                </div>
+                <span className="text-[10.5px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-md border bg-muted text-muted-foreground border-border capitalize">{t.status}</span>
+                <Button size="sm" variant="ghost" onClick={() => downloadInvoice(t)} className="h-8 w-8 p-0 rounded-lg"><Download className="w-4 h-4" /></Button>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

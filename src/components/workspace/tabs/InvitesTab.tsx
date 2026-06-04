@@ -58,60 +58,104 @@ export default function InvitesTab() {
     } catch { toast.error("Failed to resend"); }
   };
 
-  if (!isAdmin) return <p className="text-sm text-muted-foreground">Only admins can manage invites.</p>;
+  if (!isAdmin) {
+    return (
+      <div className="space-y-8 animate-fade-in">
+        <div>
+          <h2 className="text-[22px] font-semibold tracking-tight text-foreground">Invites</h2>
+          <p className="text-[13px] text-muted-foreground mt-1">Only workspace admins can manage invites.</p>
+        </div>
+        <div className="p-10 rounded-2xl border border-dashed border-border/60 bg-card/40 text-center">
+          <Mail className="w-5 h-5 text-muted-foreground/60 mx-auto mb-2" />
+          <p className="text-[13px] text-muted-foreground">Ask an admin to invite teammates.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const statusTint = (status: string) => {
+    if (status === "pending") return "bg-amber-500/10 text-amber-600 border-amber-500/20";
+    if (status === "accepted") return "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
+    if (status === "revoked") return "bg-muted text-muted-foreground border-border";
+    return "bg-muted text-muted-foreground border-border";
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10 animate-fade-in">
+      <div>
+        <h2 className="text-[22px] font-semibold tracking-tight text-foreground">Invites</h2>
+        <p className="text-[13px] text-muted-foreground mt-1">Bring teammates into this workspace by email.</p>
+      </div>
+
       <section className="space-y-3">
-        <h3 className="text-sm font-semibold">Invite teammate</h3>
-        <div className="flex gap-2">
-          <Input
-            type="email"
-            placeholder="email@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter" && !sending && email.trim()) send(); }}
-            className="flex-1"
-          />
-          <Select value={role} onValueChange={setRole}>
-            <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="admin">Admin</SelectItem>
-              <SelectItem value="editor">Editor</SelectItem>
-              <SelectItem value="member">Member</SelectItem>
-              <SelectItem value="viewer">Viewer</SelectItem>
-              <SelectItem value="billing_manager">Billing</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button onClick={send} disabled={sending || !email.trim()}>
-            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-          </Button>
+        <h3 className="text-[14px] font-semibold tracking-tight">Invite teammate</h3>
+        <div className="p-4 rounded-2xl border border-border/60 bg-card">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Input
+              type="email"
+              placeholder="teammate@company.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter" && !sending && email.trim()) send(); }}
+              className="flex-1 h-10 rounded-lg"
+            />
+            <Select value={role} onValueChange={setRole}>
+              <SelectTrigger className="w-full sm:w-36 h-10 rounded-lg"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="admin">Admin</SelectItem>
+                <SelectItem value="editor">Editor</SelectItem>
+                <SelectItem value="member">Member</SelectItem>
+                <SelectItem value="viewer">Viewer</SelectItem>
+                <SelectItem value="billing_manager">Billing</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button onClick={send} disabled={sending || !email.trim()} className="h-10 rounded-lg">
+              {sending ? <Loader2 className="w-4 h-4 animate-spin mr-1.5" /> : <Send className="w-4 h-4 mr-1.5" />}
+              Send invite
+            </Button>
+          </div>
+          <p className="text-[11.5px] text-muted-foreground mt-2.5 px-0.5">They'll get an email with a secure link to join.</p>
         </div>
       </section>
 
-      <section className="space-y-2">
-        <h3 className="text-sm font-semibold">Invites ({invites.length})</h3>
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-[14px] font-semibold tracking-tight">All invites</h3>
+          <span className="text-[11.5px] tabular-nums text-muted-foreground">{invites.length}</span>
+        </div>
         {invites.length === 0 ? (
-          <p className="text-xs text-muted-foreground">No invites yet.</p>
-        ) : invites.map(inv => (
-          <div key={inv.id} className="flex items-center gap-2 p-3 rounded-lg border border-border/40 bg-card">
-            <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm truncate">{inv.invite_email}</p>
-              <p className="text-xs text-muted-foreground">
-                {inv.role} · {inv.status}
-                {inv.expires_at && ` · expires ${new Date(inv.expires_at).toLocaleDateString()}`}
-              </p>
-            </div>
-            {inv.status === "pending" && (
-              <>
-                <Button size="sm" variant="ghost" onClick={() => copy(inv.invite_token)}><Copy className="w-3.5 h-3.5" /></Button>
-                <Button size="sm" variant="ghost" onClick={() => resend(inv)}><Send className="w-3.5 h-3.5" /></Button>
-                <Button size="sm" variant="ghost" onClick={() => revoke(inv.id)}><Trash2 className="w-3.5 h-3.5 text-destructive" /></Button>
-              </>
-            )}
+          <div className="p-10 rounded-2xl border border-dashed border-border/60 bg-card/40 text-center">
+            <Mail className="w-5 h-5 text-muted-foreground/60 mx-auto mb-2" />
+            <p className="text-[13px] text-muted-foreground">No invites yet.</p>
           </div>
-        ))}
+        ) : (
+          <div className="rounded-2xl border border-border/60 bg-card divide-y divide-border/60 overflow-hidden">
+            {invites.map(inv => (
+              <div key={inv.id} className="flex items-center gap-3 px-4 py-3 hover:bg-foreground/[0.02] transition-colors">
+                <div className="w-9 h-9 rounded-xl bg-foreground/[0.04] grid place-items-center shrink-0">
+                  <Mail className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13.5px] font-medium truncate">{inv.invite_email}</p>
+                  <p className="text-[11.5px] text-muted-foreground mt-0.5 capitalize">
+                    {inv.role}
+                    {inv.expires_at && <> <span className="text-muted-foreground/40">·</span> expires {new Date(inv.expires_at).toLocaleDateString()}</>}
+                  </p>
+                </div>
+                <span className={`text-[10.5px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-md border ${statusTint(inv.status)}`}>
+                  {inv.status}
+                </span>
+                {inv.status === "pending" && (
+                  <div className="flex gap-0.5 ml-1">
+                    <Button size="sm" variant="ghost" onClick={() => copy(inv.invite_token)} className="h-8 w-8 p-0 rounded-lg" title="Copy link"><Copy className="w-3.5 h-3.5" /></Button>
+                    <Button size="sm" variant="ghost" onClick={() => resend(inv)} className="h-8 w-8 p-0 rounded-lg" title="Resend"><Send className="w-3.5 h-3.5" /></Button>
+                    <Button size="sm" variant="ghost" onClick={() => revoke(inv.id)} className="h-8 w-8 p-0 rounded-lg hover:bg-destructive/10 hover:text-destructive" title="Revoke"><Trash2 className="w-3.5 h-3.5" /></Button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

@@ -38,16 +38,16 @@ export default function GeneralTab() {
   };
 
   return (
-    <div className="space-y-12">
-      <div className="space-y-2">
-        <h2 className="text-3xl font-semibold tracking-tight text-foreground">General</h2>
-        <p className="text-[15px] text-muted-foreground">Manage your workspace name and identity.</p>
+    <div className="space-y-12 animate-fade-in">
+      <div>
+        <h2 className="text-[22px] font-semibold tracking-tight text-foreground">General</h2>
+        <p className="text-[13px] text-muted-foreground mt-1">Manage your workspace name and identity.</p>
       </div>
 
-      <section className="space-y-8 pb-10 border-b border-border">
-        <div className="space-y-2">
-          <h3 className="text-[15px] font-semibold text-foreground">Workspace photo</h3>
-          <p className="text-[13px] text-muted-foreground">A square image works best. Visible to all members.</p>
+      <section className="space-y-5 pb-10 border-b border-border/60">
+        <div>
+          <h3 className="text-[14px] font-semibold tracking-tight text-foreground">Workspace photo</h3>
+          <p className="text-[12.5px] text-muted-foreground mt-1">A square image works best. Visible to all members.</p>
         </div>
         <WorkspaceImageUpload
           workspaceId={ws.id}
@@ -60,16 +60,16 @@ export default function GeneralTab() {
         />
       </section>
 
-      <section className="space-y-4 pb-10 border-b border-border">
-        <div className="space-y-2">
-          <h3 className="text-[15px] font-semibold text-foreground">Workspace name</h3>
-          <p className="text-[13px] text-muted-foreground">This is the name your members will see across the app.</p>
+      <section className="space-y-4 pb-10 border-b border-border/60">
+        <div>
+          <h3 className="text-[14px] font-semibold tracking-tight text-foreground">Workspace name</h3>
+          <p className="text-[12.5px] text-muted-foreground mt-1">This is the name your members will see across the app.</p>
         </div>
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
           disabled={!isAdmin}
-          className="max-w-md h-11"
+          className="max-w-md h-11 rounded-lg"
           placeholder="Acme Inc."
         />
       </section>

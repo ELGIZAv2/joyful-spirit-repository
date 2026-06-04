@@ -57,69 +57,99 @@ export default function UsageTab() {
     return { current: monthTotal, projected };
   }, [rows]);
 
+  const tooltipStyle = {
+    backgroundColor: "hsl(var(--card))",
+    border: "1px solid hsl(var(--border))",
+    borderRadius: 12,
+    fontSize: 12,
+    padding: "6px 10px",
+    boxShadow: "0 4px 20px -4px hsl(var(--foreground) / 0.08)",
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-10 animate-fade-in">
+      <div>
+        <h2 className="text-[22px] font-semibold tracking-tight text-foreground">Usage</h2>
+        <p className="text-[13px] text-muted-foreground mt-1">Track consumption across members and actions.</p>
+      </div>
+
       <div className="grid grid-cols-2 gap-3">
-        <div className="p-4 rounded-xl border border-border/60 bg-card">
-          <p className="text-xs text-muted-foreground">This month</p>
-          <p className="text-2xl font-semibold mt-1">{forecast.current.toFixed(0)} <span className="text-xs text-muted-foreground">MC</span></p>
+        <div className="relative p-5 rounded-2xl border border-border/60 bg-card overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.08] via-primary/0 to-transparent pointer-events-none" />
+          <div className="relative">
+            <p className="text-[11.5px] uppercase tracking-wider text-muted-foreground/80 font-medium">This month</p>
+            <p className="text-3xl font-semibold mt-1.5 tabular-nums tracking-tight">{forecast.current.toFixed(0)} <span className="text-sm text-muted-foreground font-normal">MC</span></p>
+          </div>
         </div>
-        <div className="p-4 rounded-xl border border-border/60 bg-card">
-          <div className="flex items-center gap-1"><TrendingUp className="w-3 h-3 text-emerald-500" /><p className="text-xs text-muted-foreground">Forecast</p></div>
-          <p className="text-2xl font-semibold mt-1">{forecast.projected.toFixed(0)} <span className="text-xs text-muted-foreground">MC</span></p>
+        <div className="relative p-5 rounded-2xl border border-border/60 bg-card overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.08] via-emerald-500/0 to-transparent pointer-events-none" />
+          <div className="relative">
+            <div className="flex items-center gap-1.5">
+              <TrendingUp className="w-3 h-3 text-emerald-500" />
+              <p className="text-[11.5px] uppercase tracking-wider text-muted-foreground/80 font-medium">Forecast</p>
+            </div>
+            <p className="text-3xl font-semibold mt-1.5 tabular-nums tracking-tight">{forecast.projected.toFixed(0)} <span className="text-sm text-muted-foreground font-normal">MC</span></p>
+          </div>
         </div>
       </div>
 
-      {rows.length === 0 && (
+      {rows.length === 0 ? (
         <div className="p-10 rounded-2xl border border-dashed border-border/60 bg-card/40 text-center">
-          <BarChart3 className="w-6 h-6 text-muted-foreground/60 mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">No usage in the last 30 days.</p>
+          <BarChart3 className="w-5 h-5 text-muted-foreground/60 mx-auto mb-2" />
+          <p className="text-[13px] text-muted-foreground">No usage in the last 30 days.</p>
         </div>
-      )}
-
-      {rows.length > 0 && <>
-      <section>
-        <h3 className="text-sm font-semibold mb-2">Daily usage (30d)</h3>
-        <div className="h-48 p-3 rounded-xl border border-border/60 bg-card">
-          <ResponsiveContainer>
-            <LineChart data={daily}>
-              <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-              <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-              <YAxis tick={{ fontSize: 10 }} />
-              <Tooltip />
-              <Line type="monotone" dataKey="amount" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </section>
-
-      <section>
-        <h3 className="text-sm font-semibold mb-2">Per member</h3>
-        <div className="h-48 p-3 rounded-xl border border-border/60 bg-card">
-          <ResponsiveContainer>
-            <BarChart data={perMember}>
-              <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-              <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-              <YAxis tick={{ fontSize: 10 }} />
-              <Tooltip />
-              <Bar dataKey="amount" fill="hsl(var(--primary))" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </section>
-
-      <section>
-        <h3 className="text-sm font-semibold mb-2">Top actions</h3>
-        <div className="space-y-1">
-          {perTool.map(t => (
-            <div key={t.name} className="flex items-center justify-between p-2 rounded border border-border/40 bg-card text-xs">
-              <span className="truncate">{t.name}</span>
-              <span className="font-mono">{t.amount}</span>
+      ) : (
+        <>
+          <section className="space-y-3">
+            <h3 className="text-[14px] font-semibold tracking-tight">Daily usage <span className="text-muted-foreground font-normal">· 30 days</span></h3>
+            <div className="h-56 p-4 rounded-2xl border border-border/60 bg-card">
+              <ResponsiveContainer>
+                <LineChart data={daily} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} vertical={false} />
+                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={tooltipStyle} cursor={{ stroke: "hsl(var(--border))" }} />
+                  <Line type="monotone" dataKey="amount" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
-          ))}
-        </div>
-      </section>
-      </>}
+          </section>
+
+          <section className="space-y-3">
+            <h3 className="text-[14px] font-semibold tracking-tight">Per member</h3>
+            <div className="h-56 p-4 rounded-2xl border border-border/60 bg-card">
+              <ResponsiveContainer>
+                <BarChart data={perMember} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "hsl(var(--foreground) / 0.04)" }} />
+                  <Bar dataKey="amount" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </section>
+
+          <section className="space-y-3">
+            <h3 className="text-[14px] font-semibold tracking-tight">Top actions</h3>
+            <div className="rounded-2xl border border-border/60 bg-card divide-y divide-border/60 overflow-hidden">
+              {perTool.map(t => {
+                const max = perTool[0]?.amount || 1;
+                const pct = Math.max(4, (t.amount / max) * 100);
+                return (
+                  <div key={t.name} className="relative px-4 py-2.5 hover:bg-foreground/[0.02] transition-colors">
+                    <div className="absolute inset-y-0 left-0 bg-primary/[0.05]" style={{ width: `${pct}%` }} />
+                    <div className="relative flex items-center justify-between text-[12.5px]">
+                      <span className="truncate font-medium">{t.name}</span>
+                      <span className="font-mono tabular-nums text-muted-foreground">{t.amount}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        </>
+      )}
     </div>
   );
 }
