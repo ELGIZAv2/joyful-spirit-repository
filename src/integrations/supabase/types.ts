@@ -7565,6 +7565,7 @@ export type Database = {
         }
         Returns: Json
       }
+      workspace_decline_invite: { Args: { p_token: string }; Returns: Json }
       workspace_deduct_credits: {
         Args: {
           p_action_type: string
