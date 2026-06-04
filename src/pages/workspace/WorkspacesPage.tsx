@@ -1,10 +1,13 @@
 // Workspaces list — minimal, spacious, focused.
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Plus } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, Sparkles, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useWorkspaces } from "@/hooks/useWorkspace";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DesktopSettingsLayout } from "@/components/settings/DesktopSettingsLayout";
+import { useUserPlan } from "@/hooks/useUserPlan";
+
+const PRO_PLANS = new Set(["pro", "elite", "business", "enterprise"]);
 
 // Custom "settings" mark — minimalist 2x2 dot quadrant.
 // Designed in-house to avoid the generic gear/cog look.
@@ -23,6 +26,8 @@ export default function WorkspacesPage() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { workspaces, activeId, setActive, loading } = useWorkspaces();
+  const { plan } = useUserPlan();
+  const canCreate = PRO_PLANS.has(plan);
 
   const switchTo = async (id: string | null, name: string) => {
     await setActive(id);
@@ -62,18 +67,39 @@ export default function WorkspacesPage() {
           ))
         )}
       </div>
-      <button
-        onClick={() => navigate("/settings/workspaces/new")}
-        className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl border border-dashed border-border hover:border-foreground/30 hover:bg-muted/40 transition-colors text-left group"
-      >
-        <div className="w-10 h-10 rounded-xl border border-dashed border-border grid place-items-center text-muted-foreground group-hover:text-foreground group-hover:border-foreground/30 transition-colors">
-          <Plus className="w-4 h-4" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[14px] font-medium text-foreground">Create a new workspace</p>
-          <p className="text-[12.5px] text-muted-foreground mt-0.5">Invite teammates and share credits.</p>
-        </div>
-      </button>
+      {canCreate ? (
+        <button
+          onClick={() => navigate("/settings/workspaces/new")}
+          className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl border border-dashed border-border hover:border-foreground/30 hover:bg-muted/40 transition-colors text-left group"
+        >
+          <div className="w-10 h-10 rounded-xl border border-dashed border-border grid place-items-center text-muted-foreground group-hover:text-foreground group-hover:border-foreground/30 transition-colors">
+            <Plus className="w-4 h-4" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[14px] font-medium text-foreground">Create a new workspace</p>
+            <p className="text-[12.5px] text-muted-foreground mt-0.5">Invite teammates and share credits.</p>
+          </div>
+        </button>
+      ) : (
+        <button
+          onClick={() => navigate("/pricing")}
+          className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/[0.06] via-card to-card hover:border-primary/50 transition-colors text-left group relative overflow-hidden"
+        >
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/20 grid place-items-center shrink-0">
+            <Sparkles className="w-4 h-4 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="text-[14px] font-medium text-foreground">Create a workspace</p>
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20">
+                <Lock className="w-2.5 h-2.5" /> PRO
+              </span>
+            </div>
+            <p className="text-[12.5px] text-muted-foreground mt-0.5">Upgrade to Pro to create team workspaces and invite members.</p>
+          </div>
+          <span className="text-[12.5px] font-medium text-primary shrink-0">Upgrade →</span>
+        </button>
+      )}
     </div>
   );
 
