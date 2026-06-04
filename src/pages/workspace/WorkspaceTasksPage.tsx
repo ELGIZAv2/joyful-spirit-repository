@@ -249,8 +249,9 @@ function TaskDrawer({ task, allTasks, members, onClose, onDelete }: any) {
 
   useEffect(() => {
     refresh();
+    const channelName = `task-comments-${task.id}-${Math.random().toString(36).slice(2, 10)}`;
     const ch = supabase
-      .channel(`task-comments-${task.id}`)
+      .channel(channelName)
       .on("postgres_changes", { event: "*", schema: "public", table: "workspace_task_comments", filter: `task_id=eq.${task.id}` }, () => refresh())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
@@ -259,23 +260,32 @@ function TaskDrawer({ task, allTasks, members, onClose, onDelete }: any) {
 
   const addComment = async () => {
     if (!newComment.trim()) return;
+    const content = newComment.trim();
+    if (content.length > 2000) { toast.error("Comment too long (max 2000 chars)"); return; }
     const { data: { user } } = await supabase.auth.getUser();
-    await supabase.from("workspace_task_comments").insert({ task_id: task.id, user_id: user!.id, content: newComment.trim() } as any);
+    if (!user) return;
+    const { error } = await supabase.from("workspace_task_comments").insert({ task_id: task.id, user_id: user.id, content } as any);
+    if (error) { toast.error(error.message || "Failed to post comment"); return; }
     setNewComment("");
   };
 
   const addSub = async () => {
     if (!newSub.trim()) return;
+    const title = newSub.trim();
+    if (title.length > 200) { toast.error("Title too long"); return; }
     const { data: { user } } = await supabase.auth.getUser();
-    await supabase.from("workspace_tasks").insert({
+    if (!user) return;
+    const { error } = await supabase.from("workspace_tasks").insert({
       workspace_id: task.workspace_id, parent_task_id: task.id,
-      created_by: user!.id, title: newSub.trim(), status: "todo",
+      created_by: user.id, title, status: "todo",
     } as any);
+    if (error) { toast.error(error.message || "Failed to add sub-task"); return; }
     setNewSub("");
   };
 
   const toggleSub = async (s: Task) => {
-    await supabase.from("workspace_tasks").update({ status: s.status === "done" ? "todo" : "done" } as any).eq("id", s.id);
+    const { error } = await supabase.from("workspace_tasks").update({ status: s.status === "done" ? "todo" : "done" } as any).eq("id", s.id);
+    if (error) toast.error(error.message || "Failed to update sub-task");
   };
 
   return (
