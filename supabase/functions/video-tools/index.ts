@@ -8,6 +8,7 @@
 import { falRun, extractVideoUrl, FalError } from "../_shared/fal.ts";
 import { ensurePublicUrl } from "../_shared/uploadDataUrl.ts";
 import { getAuthUser } from "../_shared/auth.ts";
+import { spendCreditsServer, creditErrorResponse } from "../_shared/credits.ts";
 
 const MEDIA_FIELDS = ["video", "image", "audio", "background", "backgroundImage", "url"] as const;
 
@@ -216,6 +217,11 @@ Deno.serve(async (req) => {
   }
 
   const model = body.model || route.defaultModel;
+
+  // Server-side credit enforcement (video tools cost more than image tools)
+  const cost = route.textResult ? 2 : 5;
+  const spend = await spendCreditsServer(authUser.id, cost, `video_tools:${body.tool}`, `Video tool: ${body.tool}`);
+  if (!spend.ok) return creditErrorResponse(spend, corsHeaders);
 
   try {
     // Auto-upload any data: URLs to public storage so fal can fetch them.

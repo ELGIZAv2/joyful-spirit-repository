@@ -5,6 +5,7 @@
 // Reads/writes the `projects` + `ai_project_files` + `ai_project_messages` tables.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { spendCreditsServer, creditErrorResponse } from "../_shared/credits.ts";
 
 const LOVABLE_GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-2.5-flash";
@@ -209,6 +210,9 @@ Deno.serve(async (req) => {
     if (!project || (project as { user_id: string }).user_id !== user.id) {
       return new Response(JSON.stringify({ error: "forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+    // Server-side credit enforcement (build agent run)
+    const spend = await spendCreditsServer(user.id, 3, "code_build", "Code agent build run");
+    if (!spend.ok) return creditErrorResponse(spend, corsHeaders);
     const { data: job, error: jobErr } = await sb.from("background_jobs").insert({
       user_id: user.id, kind: "code_build", status: "queued", progress: 0,
       status_text: "في الانتظار…", input: { projectId, message: userMessage }, meta: { events: [] }, stream_text: "",
