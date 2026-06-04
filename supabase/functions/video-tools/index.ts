@@ -8,6 +8,7 @@
 import { falRun, extractVideoUrl, FalError } from "../_shared/fal.ts";
 import { ensurePublicUrl } from "../_shared/uploadDataUrl.ts";
 import { getAuthUser } from "../_shared/auth.ts";
+import { spendCreditsServer, creditErrorResponse } from "../_shared/credits.ts";
 
 const MEDIA_FIELDS = ["video", "image", "audio", "background", "backgroundImage", "url"] as const;
 
