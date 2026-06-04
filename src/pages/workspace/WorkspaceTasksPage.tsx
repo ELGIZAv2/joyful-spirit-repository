@@ -267,6 +267,15 @@ function TaskDrawer({ task, allTasks, members, onClose, onDelete }: any) {
     const { error } = await supabase.from("workspace_task_comments").insert({ task_id: task.id, user_id: user.id, content } as any);
     if (error) { toast.error(error.message || "Failed to post comment"); return; }
     setNewComment("");
+    // Notify assignee + creator (skip self handled server-side).
+    const targets = Array.from(new Set([task.assignee_id, task.created_by].filter((x: any) => x && x !== user.id)));
+    for (const t of targets) {
+      try {
+        await supabase.functions.invoke("workspace-notify", {
+          body: { type: "task_comment", workspace_id: task.workspace_id, assignee_id: t, title: task.title },
+        });
+      } catch {}
+    }
   };
 
   const addSub = async () => {
