@@ -24,10 +24,11 @@ export default function InvitesTab() {
   const send = async () => {
     const e = email.trim().toLowerCase();
     if (!e) return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) { toast.error("Invalid email address"); return; }
     setSending(true);
     const { data, error } = await supabase.rpc("workspace_create_invite" as any, { p_workspace_id: ws.id, p_email: e, p_role: role });
     setSending(false);
-    if (error || !(data as any)?.success) { toast.error((data as any)?.error || error?.message); return; }
+    if (error || !(data as any)?.success) { toast.error((data as any)?.error || error?.message || "Failed to send invite"); return; }
     const link = `${window.location.origin}/invite/workspace/${(data as any).token}`;
     try {
       await supabase.functions.invoke("workspace-notify", { body: { type: "invite", workspace_id: ws.id, workspace_name: ws.name, to: e, link } });
@@ -36,8 +37,19 @@ export default function InvitesTab() {
     setEmail(""); load();
   };
 
-  const copy = (t: string) => { navigator.clipboard.writeText(`${window.location.origin}/invite/workspace/${t}`); toast.success("Copied"); };
-  const revoke = async (id: string) => { await supabase.from("workspace_invites").update({ status: "revoked" } as any).eq("id", id); load(); };
+  const copy = (t: string) => {
+    navigator.clipboard.writeText(`${window.location.origin}/invite/workspace/${t}`).then(
+      () => toast.success("Invite link copied"),
+      () => toast.error("Failed to copy"),
+    );
+  };
+  const revoke = async (id: string) => {
+    if (!confirm("Revoke this invite? The link will stop working.")) return;
+    const { error } = await supabase.from("workspace_invites").update({ status: "revoked" } as any).eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Invite revoked");
+    load();
+  };
   const resend = async (inv: any) => {
     const link = `${window.location.origin}/invite/workspace/${inv.invite_token}`;
     try {
@@ -53,7 +65,14 @@ export default function InvitesTab() {
       <section className="space-y-3">
         <h3 className="text-sm font-semibold">Invite teammate</h3>
         <div className="flex gap-2">
-          <Input type="email" placeholder="email@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="flex-1" />
+          <Input
+            type="email"
+            placeholder="email@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !sending && email.trim()) send(); }}
+            className="flex-1"
+          />
           <Select value={role} onValueChange={setRole}>
             <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
             <SelectContent>
