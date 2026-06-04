@@ -8,26 +8,45 @@ export default function PresenceBar({ workspaceId }: { workspaceId: string }) {
 
   useEffect(() => {
     let cancelled = false;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data: prof } = await supabase.from("profiles").select("display_name, avatar_url").eq("id", user.id).maybeSingle();
-      const channel = supabase.channel(`ws-presence-${workspaceId}`, { config: { presence: { key: user.id } } });
-      channel
-        .on("presence", { event: "sync" }, () => {
-          const state = channel.presenceState() as Record<string, Presence[]>;
-          const list: Presence[] = [];
-          Object.values(state).forEach(arr => arr.forEach(p => list.push(p)));
-          if (!cancelled) setOnline(list);
-        })
-        .subscribe(async (status) => {
-          if (status === "SUBSCRIBED") {
-            await channel.track({ user_id: user.id, display_name: (prof as any)?.display_name, avatar_url: (prof as any)?.avatar_url });
-          }
-        });
-      return () => { supabase.removeChannel(channel); };
+      if (!user || cancelled) return;
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("display_name, avatar_url")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (cancelled) return;
+
+      // Unique channel name per mount avoids "callbacks after subscribe()" in StrictMode/hot reload.
+      const ch = supabase.channel(
+        `ws-presence-${workspaceId}-${Math.random().toString(36).slice(2, 10)}`,
+        { config: { presence: { key: user.id } } },
+      );
+      channel = ch;
+
+      ch.on("presence", { event: "sync" }, () => {
+        const state = ch.presenceState() as Record<string, Presence[]>;
+        const list: Presence[] = [];
+        Object.values(state).forEach((arr) => arr.forEach((p) => list.push(p)));
+        if (!cancelled) setOnline(list);
+      }).subscribe(async (status) => {
+        if (status === "SUBSCRIBED" && !cancelled) {
+          await ch.track({
+            user_id: user.id,
+            display_name: (prof as any)?.display_name,
+            avatar_url: (prof as any)?.avatar_url,
+          });
+        }
+      });
     })();
-    return () => { cancelled = true; };
+
+    return () => {
+      cancelled = true;
+      if (channel) supabase.removeChannel(channel);
+    };
   }, [workspaceId]);
 
   if (online.length === 0) return null;

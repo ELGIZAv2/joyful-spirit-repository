@@ -24,10 +24,13 @@ export default function GeneralTab() {
   }, [ws.id]);
 
   const save = async () => {
+    const trimmed = name.trim();
+    if (trimmed.length < 2) { toast.error("Name must be at least 2 characters"); return; }
+    if (trimmed.length > 60) { toast.error("Name must be 60 characters or fewer"); return; }
     setSaving(true);
     const { error } = await supabase
       .from("workspaces")
-      .update({ name: name.trim(), avatar_url: avatarUrl } as any)
+      .update({ name: trimmed, avatar_url: avatarUrl } as any)
       .eq("id", ws.id);
     setSaving(false);
     if (error) toast.error(error.message);

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, BarChart3 } from "lucide-react";
 import type { WorkspaceCtx } from "@/hooks/useWorkspaceContext";
 
 export default function UsageTab() {
@@ -70,6 +70,14 @@ export default function UsageTab() {
         </div>
       </div>
 
+      {rows.length === 0 && (
+        <div className="p-10 rounded-2xl border border-dashed border-border/60 bg-card/40 text-center">
+          <BarChart3 className="w-6 h-6 text-muted-foreground/60 mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground">No usage in the last 30 days.</p>
+        </div>
+      )}
+
+      {rows.length > 0 && <>
       <section>
         <h3 className="text-sm font-semibold mb-2">Daily usage (30d)</h3>
         <div className="h-48 p-3 rounded-xl border border-border/60 bg-card">
@@ -111,6 +119,7 @@ export default function UsageTab() {
           ))}
         </div>
       </section>
+      </>}
     </div>
   );
 }

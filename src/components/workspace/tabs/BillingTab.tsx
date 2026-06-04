@@ -44,7 +44,9 @@ export default function BillingTab() {
 
   const updateDefault = async () => {
     const v = defaultLimit.trim() === "" ? null : Number(defaultLimit);
-    await supabase.from("workspaces").update({ default_member_monthly_limit: v } as any).eq("id", ws.id);
+    if (v !== null && (!Number.isFinite(v) || v < 0)) { toast.error("Invalid limit"); return; }
+    const { error } = await supabase.from("workspaces").update({ default_member_monthly_limit: v } as any).eq("id", ws.id);
+    if (error) { toast.error(error.message); return; }
     toast.success("Default limit saved");
   };
 

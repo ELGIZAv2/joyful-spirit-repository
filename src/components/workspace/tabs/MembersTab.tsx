@@ -53,22 +53,37 @@ export default function MembersTab() {
   const removeMember = async (memberId: string, userId: string) => {
     if (userId === ws.owner_id) { toast.error("Can't remove owner"); return; }
     if (!confirm("Remove this member?")) return;
-    await supabase.from("workspace_members").delete().eq("id", memberId);
+    const { error } = await supabase.from("workspace_members").delete().eq("id", memberId);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Member removed");
     refresh();
   };
 
   const updateLimit = async (memberId: string, val: string) => {
     const v = val.trim() === "" ? null : Number(val);
-    await supabase.from("workspace_members").update({ monthly_limit: v } as any).eq("id", memberId);
+    if (v !== null && (!Number.isFinite(v) || v < 0)) { toast.error("Invalid limit"); return; }
+    const { error } = await supabase.from("workspace_members").update({ monthly_limit: v } as any).eq("id", memberId);
+    if (error) toast.error(error.message); else toast.success("Limit updated");
   };
 
   const approveRequest = async (id: string) => {
-    const { data } = await supabase.rpc("workspace_approve_request" as any, { p_request_id: id });
-    if ((data as any)?.success) { toast.success("Approved"); setRequests(r => r.filter(x => x.id !== id)); refresh(); }
+    const { data, error } = await supabase.rpc("workspace_approve_request" as any, { p_request_id: id });
+    if (error || !(data as any)?.success) {
+      toast.error((data as any)?.error || error?.message || "Failed to approve");
+      return;
+    }
+    toast.success("Approved");
+    setRequests((r) => r.filter((x) => x.id !== id));
+    refresh();
   };
   const rejectRequest = async (id: string) => {
-    const { data } = await supabase.rpc("workspace_reject_request" as any, { p_request_id: id });
-    if ((data as any)?.success) { toast.success("Rejected"); setRequests(r => r.filter(x => x.id !== id)); }
+    const { data, error } = await supabase.rpc("workspace_reject_request" as any, { p_request_id: id });
+    if (error || !(data as any)?.success) {
+      toast.error((data as any)?.error || error?.message || "Failed to reject");
+      return;
+    }
+    toast.success("Rejected");
+    setRequests((r) => r.filter((x) => x.id !== id));
   };
 
   return (
