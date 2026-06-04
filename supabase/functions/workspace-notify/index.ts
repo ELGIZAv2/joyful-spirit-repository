@@ -72,10 +72,13 @@ Deno.serve(async (req) => {
     const to = body?.to;
     const link = body?.link;
 
-    if (type !== "invite") return json(400, { error: "invalid_type" });
+    const IN_APP_TYPES = new Set(["task_assigned", "task_comment", "task_mentioned", "member_added"]);
+    if (type !== "invite" && !IN_APP_TYPES.has(type)) return json(400, { error: "invalid_type" });
     if (!workspace_id) return json(400, { error: "workspace_id_required" });
-    if (!validEmail(to)) return json(400, { error: "invalid_email" });
-    if (!validUrl(link)) return json(400, { error: "invalid_link" });
+    if (type === "invite") {
+      if (!validEmail(to)) return json(400, { error: "invalid_email" });
+      if (!validUrl(link)) return json(400, { error: "invalid_link" });
+    }
 
     // Auth check: caller must own or admin the workspace.
     const { data: ws } = await admin
@@ -86,6 +89,7 @@ Deno.serve(async (req) => {
     if (!ws) return json(404, { error: "workspace_not_found" });
 
     let isAdmin = ws.owner_id === userId;
+    let isMember = isAdmin;
     if (!isAdmin) {
       const { data: mem } = await admin
         .from("workspace_members")
@@ -94,8 +98,51 @@ Deno.serve(async (req) => {
         .eq("user_id", userId)
         .maybeSingle();
       isAdmin = mem?.role === "admin";
+      isMember = !!mem;
     }
-    if (!isAdmin) return json(403, { error: "forbidden" });
+    // Invites require admin; in-app workspace notifications only require membership.
+    if (type === "invite" && !isAdmin) return json(403, { error: "forbidden" });
+    if (IN_APP_TYPES.has(type) && !isMember) return json(403, { error: "forbidden" });
+
+    if (IN_APP_TYPES.has(type)) {
+      const target = typeof body?.assignee_id === "string" ? body.assignee_id
+        : typeof body?.user_id === "string" ? body.user_id : "";
+      if (!target) return json(400, { error: "target_user_required" });
+      if (target === userId) return json(200, { ok: true, skipped: "self" });
+      // Target must be a workspace member.
+      const { data: tm } = await admin
+        .from("workspace_members")
+        .select("user_id")
+        .eq("workspace_id", workspace_id)
+        .eq("user_id", target)
+        .maybeSingle();
+      if (!tm) return json(403, { error: "target_not_member" });
+
+      const safeTitle = String(body?.title ?? "").slice(0, 200);
+      const wsName = ws.name || workspace_name;
+      const titleMap: Record<string, string> = {
+        task_assigned: `New task in ${wsName}`,
+        task_comment: `New comment in ${wsName}`,
+        task_mentioned: `You were mentioned in ${wsName}`,
+        member_added: `Added to ${wsName}`,
+      };
+      const messageMap: Record<string, string> = {
+        task_assigned: safeTitle ? `Assigned: ${safeTitle}` : "You have a new task",
+        task_comment: safeTitle ? `On: ${safeTitle}` : "New comment on a task",
+        task_mentioned: safeTitle ? `In: ${safeTitle}` : "You were mentioned",
+        member_added: `You've been added to ${wsName}`,
+      };
+      const { error: nerr } = await admin.from("notifications").insert({
+        user_id: target,
+        type,
+        title: titleMap[type],
+        message: messageMap[type],
+        read: false,
+        metadata: { workspace_id, task_title: safeTitle },
+      });
+      if (nerr) return json(500, { error: "notify_failed", detail: nerr.message });
+      return json(200, { ok: true });
+    }
 
     const safeName = escapeHtml(workspace_name || ws.name || "Workspace");
     const safeLink = escapeHtml(link);
