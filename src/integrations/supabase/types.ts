@@ -7519,6 +7519,15 @@ export type Database = {
           similarity: number
         }[]
       }
+      spend_credits_auto: {
+        Args: {
+          p_action_type: string
+          p_amount: number
+          p_description?: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       update_profile_safe: {
         Args: {
           p_avatar_url?: string
