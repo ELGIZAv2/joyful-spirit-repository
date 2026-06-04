@@ -218,6 +218,11 @@ Deno.serve(async (req) => {
 
   const model = body.model || route.defaultModel;
 
+  // Server-side credit enforcement (video tools cost more than image tools)
+  const cost = route.textResult ? 2 : 5;
+  const spend = await spendCreditsServer(authUser.id, cost, `video_tools:${body.tool}`, `Video tool: ${body.tool}`);
+  if (!spend.ok) return creditErrorResponse(spend, corsHeaders);
+
   try {
     // Auto-upload any data: URLs to public storage so fal can fetch them.
     for (const f of MEDIA_FIELDS) {
