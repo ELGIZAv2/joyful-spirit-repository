@@ -37,14 +37,22 @@ export default function BrandTab() {
     if (error) toast.error(error.message); else toast.success("Saved");
   };
 
+  const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
+    <div className="space-y-2">
+      <label className="text-[11.5px] font-medium uppercase tracking-wider text-muted-foreground">{label}</label>
+      {children}
+    </div>
+  );
+
   return (
-    <div className="space-y-10">
+    <div className="space-y-12 animate-fade-in">
       <div>
-        <h2 className="text-xl font-semibold tracking-tight text-foreground">Brand kit</h2>
-        <p className="text-sm text-muted-foreground mt-1">Logo, color and typography for your workspace.</p>
+        <h2 className="text-[22px] font-semibold tracking-tight text-foreground">Brand kit</h2>
+        <p className="text-[13px] text-muted-foreground mt-1">Logo, color and typography for your workspace.</p>
       </div>
 
-      <div className="space-y-6">
+      <section className="space-y-6 pb-10 border-b border-border/60">
+        <h3 className="text-[14px] font-semibold tracking-tight">Visuals</h3>
         <WorkspaceImageUpload
           workspaceId={ws.id} value={brand.logo_url}
           onChange={(url) => setBrand((b: any) => ({ ...b, logo_url: url }))}
@@ -55,50 +63,50 @@ export default function BrandTab() {
           onChange={(url) => setBrand((b: any) => ({ ...b, cover_url: url }))}
           kind="cover" label="Cover image" shape="wide" disabled={!isAdmin}
         />
+      </section>
 
-        <div className="space-y-1.5">
-          <label className="text-xs font-medium text-foreground">Primary color</label>
-          <div className="flex gap-2">
+      <section className="space-y-6 pb-10 border-b border-border/60">
+        <h3 className="text-[14px] font-semibold tracking-tight">Color & typography</h3>
+        <Field label="Primary color">
+          <div className="flex gap-2 max-w-md">
             <input
               type="color"
               value={brand.primary_color || "#000000"}
               onChange={(e) => setBrand((b: any) => ({ ...b, primary_color: e.target.value }))}
               disabled={!isAdmin}
-              className="w-12 h-10 rounded-md border border-border bg-background cursor-pointer"
+              className="w-11 h-10 rounded-lg border border-border bg-background cursor-pointer shrink-0"
             />
             <Input
               value={brand.primary_color || ""}
               onChange={(e) => setBrand((b: any) => ({ ...b, primary_color: e.target.value }))}
               disabled={!isAdmin}
-              className="font-mono text-xs flex-1"
+              className="font-mono text-[12.5px] h-10 rounded-lg flex-1"
             />
           </div>
-        </div>
+        </Field>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-foreground">Heading font</label>
-            <Input value={brand.heading_font || ""} onChange={(e) => setBrand((b: any) => ({ ...b, heading_font: e.target.value }))} disabled={!isAdmin} />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-foreground">Body font</label>
-            <Input value={brand.body_font || ""} onChange={(e) => setBrand((b: any) => ({ ...b, body_font: e.target.value }))} disabled={!isAdmin} />
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
+          <Field label="Heading font">
+            <Input value={brand.heading_font || ""} onChange={(e) => setBrand((b: any) => ({ ...b, heading_font: e.target.value }))} disabled={!isAdmin} className="h-10 rounded-lg" />
+          </Field>
+          <Field label="Body font">
+            <Input value={brand.body_font || ""} onChange={(e) => setBrand((b: any) => ({ ...b, body_font: e.target.value }))} disabled={!isAdmin} className="h-10 rounded-lg" />
+          </Field>
         </div>
+      </section>
 
-        <div className="space-y-1.5">
-          <label className="text-xs font-medium text-foreground">Tone of voice</label>
-          <Input value={brand.tone_of_voice || ""} onChange={(e) => setBrand((b: any) => ({ ...b, tone_of_voice: e.target.value }))} disabled={!isAdmin} placeholder="Friendly, professional…" />
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="text-xs font-medium text-foreground">Brand description</label>
-          <Textarea value={brand.brand_description || ""} onChange={(e) => setBrand((b: any) => ({ ...b, brand_description: e.target.value }))} disabled={!isAdmin} rows={3} />
-        </div>
-      </div>
+      <section className="space-y-6">
+        <h3 className="text-[14px] font-semibold tracking-tight">Voice</h3>
+        <Field label="Tone of voice">
+          <Input value={brand.tone_of_voice || ""} onChange={(e) => setBrand((b: any) => ({ ...b, tone_of_voice: e.target.value }))} disabled={!isAdmin} placeholder="Friendly, professional…" className="h-10 rounded-lg max-w-md" />
+        </Field>
+        <Field label="Brand description">
+          <Textarea value={brand.brand_description || ""} onChange={(e) => setBrand((b: any) => ({ ...b, brand_description: e.target.value }))} disabled={!isAdmin} rows={4} className="rounded-lg resize-none" />
+        </Field>
+      </section>
 
       {isAdmin && (
-        <div className="pt-4 border-t border-border">
+        <div className="flex justify-end">
           <Button variant="solid" onClick={save} disabled={saving}>
             {saving ? "Saving…" : "Save brand kit"}
           </Button>

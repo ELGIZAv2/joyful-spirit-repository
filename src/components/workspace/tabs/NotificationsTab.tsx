@@ -43,23 +43,23 @@ export default function NotificationsTab() {
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8 animate-fade-in">
       <div>
-        <h2 className="text-xl font-semibold tracking-tight text-foreground">Notifications</h2>
-        <p className="text-sm text-muted-foreground mt-1">Choose how this workspace notifies you.</p>
+        <h2 className="text-[22px] font-semibold tracking-tight text-foreground">Notifications</h2>
+        <p className="text-[13px] text-muted-foreground mt-1">Choose how this workspace notifies you.</p>
       </div>
 
-      <div className="border border-border rounded-lg overflow-hidden">
-        <div className="grid grid-cols-[1fr_90px_90px] px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground border-b border-border bg-muted/30">
+      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="grid grid-cols-[1fr_90px_90px] px-5 py-3 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground border-b border-border/60 bg-foreground/[0.02]">
           <span>Event</span>
           <span className="text-center">In-app</span>
           <span className="text-center">Email</span>
         </div>
         {EVENTS.map((e, i) => (
-          <div key={e.key} className={`grid grid-cols-[1fr_90px_90px] items-center px-4 py-4 ${i < EVENTS.length - 1 ? "border-b border-border" : ""}`}>
+          <div key={e.key} className={`grid grid-cols-[1fr_90px_90px] items-center px-5 py-4 hover:bg-foreground/[0.02] transition-colors ${i < EVENTS.length - 1 ? "border-b border-border/60" : ""}`}>
             <div>
-              <p className="text-sm font-medium text-foreground">{e.label}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{e.desc}</p>
+              <p className="text-[13.5px] font-medium text-foreground">{e.label}</p>
+              <p className="text-[12px] text-muted-foreground mt-0.5">{e.desc}</p>
             </div>
             <div className="flex justify-center">
               <Switch checked={!!prefs.in_app[e.key]} onCheckedChange={(v) => toggle("in_app", e.key, v)} />
