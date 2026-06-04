@@ -3,18 +3,15 @@ import { useOutletContext } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FileText, Download, Wallet } from "lucide-react";
+import { FileText, Download, Wallet, ArrowUpRight } from "lucide-react";
 import { toast } from "sonner";
 import type { WorkspaceCtx } from "@/hooks/useWorkspaceContext";
-
-const TOPUP_PACKS = [
-  { credits: 100, usd: 12 },
-  { credits: 500, usd: 50 },
-  { credits: 1500, usd: 130 },
-];
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 export default function BillingTab() {
   const { ws, isAdmin, canBilling } = useOutletContext<{ ws: WorkspaceCtx; isAdmin: boolean; canBilling: boolean }>();
+  const navigate = useNavigate();
   const [topups, setTopups] = useState<any[]>([]);
   const [defaultLimit, setDefaultLimit] = useState<string>(ws.default_member_monthly_limit?.toString() ?? "");
 
@@ -24,10 +21,6 @@ export default function BillingTab() {
       setTopups((data as any) ?? []);
     })();
   }, [ws.id]);
-
-  const buyPack = async (_credits: number) => {
-    toast.info("Credit top-ups are coming soon. For now, upgrade your plan to add monthly credits.");
-  };
 
   const downloadInvoice = (t: any) => {
     const html = `<!doctype html><html><head><meta charset="utf-8"><title>Invoice ${t.invoice_number}</title>
@@ -68,16 +61,15 @@ export default function BillingTab() {
 
       {canBilling && (
         <section className="space-y-3">
-          <h3 className="text-sm font-semibold">Top up credits</h3>
-          <div className="grid grid-cols-3 gap-2">
-            {TOPUP_PACKS.map(p => (
-              <button key={p.credits} onClick={() => buyPack(p.credits)}
-                className="p-3 rounded-xl border border-border/60 bg-card hover:border-foreground transition text-center">
-                <p className="text-lg font-semibold">{p.credits}</p>
-                <p className="text-xs text-muted-foreground">MC</p>
-                <p className="text-sm mt-1">${p.usd}</p>
-              </button>
-            ))}
+          <h3 className="text-sm font-semibold">More credits</h3>
+          <div className="p-4 rounded-xl border border-border/60 bg-card flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-sm font-medium">Upgrade plan</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Higher plans add more monthly credits to this workspace.</p>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => navigate("/pricing")}>
+              View plans <ArrowUpRight className="w-3.5 h-3.5 ml-1" />
+            </Button>
           </div>
         </section>
       )}
@@ -86,8 +78,8 @@ export default function BillingTab() {
         <section className="space-y-2">
           <h3 className="text-sm font-semibold">Default monthly limit per member</h3>
           <div className="flex gap-2">
-            <Input type="number" placeholder="No limit" value={defaultLimit} onChange={(e) => setDefaultLimit(e.target.value)} />
-            <Button onClick={updateDefault}>Save</Button>
+              <Input type="number" placeholder="No limit" value={defaultLimit} onChange={(e) => setDefaultLimit(e.target.value)} />
+              <Button onClick={updateDefault}>Save</Button>
           </div>
           <p className="text-xs text-muted-foreground">Applied to new members. Existing limits unchanged.</p>
         </section>
