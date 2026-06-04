@@ -171,6 +171,7 @@ const OperatorAuditPage = lazy(() => import("./pages/settings/OperatorAuditPage"
 const WorkspacesPage = lazy(() => import("./pages/workspace/WorkspacesPage"));
 const WorkspaceCreatePage = lazy(() => import("./pages/workspace/WorkspaceCreatePage"));
 const WorkspaceDetailPage = lazy(() => import("./pages/workspace/WorkspaceDetailPage"));
+const WorkspaceProGate = lazy(() => import("./components/workspace/WorkspaceProGate"));
 const WsOverviewTab = lazy(() => import("./components/workspace/tabs/OverviewTab"));
 const WsMembersTab = lazy(() => import("./components/workspace/tabs/MembersTab"));
 const WsInvitesTab = lazy(() => import("./components/workspace/tabs/InvitesTab"));
@@ -634,7 +635,7 @@ const App = () => {
                   <Route path="/settings/privacy" element={<ProtectedRoute><SettingsPrivacyPage /></ProtectedRoute>} />
                   
                   <Route path="/settings/workspaces" element={<ProtectedRoute><WorkspacesPage /></ProtectedRoute>} />
-                  <Route path="/settings/workspaces/new" element={<ProtectedRoute><WorkspaceCreatePage /></ProtectedRoute>} />
+                  <Route path="/settings/workspaces/new" element={<ProtectedRoute><WorkspaceProGate><WorkspaceCreatePage /></WorkspaceProGate></ProtectedRoute>} />
                   <Route path="/settings/workspaces/:id" element={<ProtectedRoute><WorkspaceDetailPage /></ProtectedRoute>}>
                     <Route index element={<WsOverviewTab />} />
                     <Route path="members" element={<WsMembersTab />} />
