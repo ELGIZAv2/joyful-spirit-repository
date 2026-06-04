@@ -68,8 +68,9 @@ export default function WorkspaceTasksPage() {
   useEffect(() => {
     refresh();
     if (!id) return;
+    const channelName = `ws-tasks-${id}-${Math.random().toString(36).slice(2, 10)}`;
     const ch = supabase
-      .channel(`ws-tasks-${id}`)
+      .channel(channelName)
       .on("postgres_changes", { event: "*", schema: "public", table: "workspace_tasks", filter: `workspace_id=eq.${id}` }, () => refresh())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
@@ -84,34 +85,40 @@ export default function WorkspaceTasksPage() {
 
   const createTask = async (status: Status) => {
     if (!id || !me || !draft.title.trim()) return;
+    const title = draft.title.trim();
+    if (title.length > 200) { toast.error("Title is too long (max 200 chars)"); return; }
     const tags = draft.tags.split(",").map(s => s.trim()).filter(Boolean);
     const { error } = await supabase.from("workspace_tasks").insert({
       workspace_id: id, created_by: me, status,
-      title: draft.title.trim(),
+      title,
       description: draft.description.trim() || null,
       priority: draft.priority,
       assignee_id: draft.assignee_id || null,
       due_date: draft.due_date || null,
       tags,
     } as any);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(error.message || "Failed to create task"); return; }
+    toast.success("Task created");
     setDraft({ title: "", description: "", priority: "medium", assignee_id: "", due_date: "", tags: "" });
     setShowCreate(null);
     // Notify assignee
-    if (draft.assignee_id) {
+    if (draft.assignee_id && draft.assignee_id !== me) {
       try {
         await supabase.functions.invoke("workspace-notify", {
-          body: { type: "task_assigned", workspace_id: id, assignee_id: draft.assignee_id, title: draft.title.trim() },
+          body: { type: "task_assigned", workspace_id: id, assignee_id: draft.assignee_id, title },
         });
       } catch {}
     }
   };
 
   const updateStatus = async (task: Task, status: Status) => {
-    await supabase.from("workspace_tasks").update({ status } as any).eq("id", task.id);
+    const { error } = await supabase.from("workspace_tasks").update({ status } as any).eq("id", task.id);
+    if (error) toast.error(error.message || "Failed to update status");
   };
   const deleteTask = async (taskId: string) => {
-    await supabase.from("workspace_tasks").delete().eq("id", taskId);
+    const { error } = await supabase.from("workspace_tasks").delete().eq("id", taskId);
+    if (error) { toast.error(error.message || "Failed to delete task"); return; }
+    toast.success("Task deleted");
     setOpenTask(null);
   };
 
@@ -242,8 +249,9 @@ function TaskDrawer({ task, allTasks, members, onClose, onDelete }: any) {
 
   useEffect(() => {
     refresh();
+    const channelName = `task-comments-${task.id}-${Math.random().toString(36).slice(2, 10)}`;
     const ch = supabase
-      .channel(`task-comments-${task.id}`)
+      .channel(channelName)
       .on("postgres_changes", { event: "*", schema: "public", table: "workspace_task_comments", filter: `task_id=eq.${task.id}` }, () => refresh())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
@@ -252,23 +260,41 @@ function TaskDrawer({ task, allTasks, members, onClose, onDelete }: any) {
 
   const addComment = async () => {
     if (!newComment.trim()) return;
+    const content = newComment.trim();
+    if (content.length > 2000) { toast.error("Comment too long (max 2000 chars)"); return; }
     const { data: { user } } = await supabase.auth.getUser();
-    await supabase.from("workspace_task_comments").insert({ task_id: task.id, user_id: user!.id, content: newComment.trim() } as any);
+    if (!user) return;
+    const { error } = await supabase.from("workspace_task_comments").insert({ task_id: task.id, user_id: user.id, content } as any);
+    if (error) { toast.error(error.message || "Failed to post comment"); return; }
     setNewComment("");
+    // Notify assignee + creator (skip self handled server-side).
+    const targets = Array.from(new Set([task.assignee_id, task.created_by].filter((x: any) => x && x !== user.id)));
+    for (const t of targets) {
+      try {
+        await supabase.functions.invoke("workspace-notify", {
+          body: { type: "task_comment", workspace_id: task.workspace_id, assignee_id: t, title: task.title },
+        });
+      } catch {}
+    }
   };
 
   const addSub = async () => {
     if (!newSub.trim()) return;
+    const title = newSub.trim();
+    if (title.length > 200) { toast.error("Title too long"); return; }
     const { data: { user } } = await supabase.auth.getUser();
-    await supabase.from("workspace_tasks").insert({
+    if (!user) return;
+    const { error } = await supabase.from("workspace_tasks").insert({
       workspace_id: task.workspace_id, parent_task_id: task.id,
-      created_by: user!.id, title: newSub.trim(), status: "todo",
+      created_by: user.id, title, status: "todo",
     } as any);
+    if (error) { toast.error(error.message || "Failed to add sub-task"); return; }
     setNewSub("");
   };
 
   const toggleSub = async (s: Task) => {
-    await supabase.from("workspace_tasks").update({ status: s.status === "done" ? "todo" : "done" } as any).eq("id", s.id);
+    const { error } = await supabase.from("workspace_tasks").update({ status: s.status === "done" ? "todo" : "done" } as any).eq("id", s.id);
+    if (error) toast.error(error.message || "Failed to update sub-task");
   };
 
   return (
