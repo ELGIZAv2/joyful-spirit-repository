@@ -11,6 +11,7 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { pickV0Key, blockV0Key, shouldBlockOnStatus } from "../_shared/v0-keys.ts";
+import { spendCreditsServer, creditErrorResponse } from "../_shared/credits.ts";
 
 const V0_BASE = "https://api.v0.dev/v1";
 
@@ -159,6 +160,12 @@ Deno.serve(async (req) => {
     }
 
     const tier = modelTier || project.model_tier || "smart";
+
+    // Server-side credit enforcement (v0 is the most expensive — varies by tier)
+    const cost = tier === "pro" ? 10 : tier === "lite" ? 3 : 6;
+    const spend = await spendCreditsServer(user.id, cost, `code_v0:${tier}`, `v0 generation (${tier})`);
+    if (!spend.ok) return creditErrorResponse(spend, corsHeaders);
+
     const modelId = resolveModelId(tier);
     if (modelTier && modelTier !== project.model_tier) {
       await sb.from(tableName).update({ model_tier: modelTier }).eq("id", projectId);
