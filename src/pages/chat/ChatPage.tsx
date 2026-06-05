@@ -20,7 +20,7 @@ import ModelPickerSheet from "@/components/model-picker/ModelPickerSheet";
 import { ModelBrandIcon } from "@/components/model-picker/ModelSelector";
 import AgentsOnboarding from "@/components/chat/AgentsOnboarding";
 import ChatTour from "@/components/chat/ChatTour";
-import ProUpsellModal from "@/components/onboarding/ProUpsellModal";
+
 import ThinkingLoader from "@/components/chat/ThinkingLoader";
 import FancyButton from "@/components/branding/FancyButton";
 import type { AgentDef, AgentModel } from "@/lib/agentRegistry";
@@ -4566,8 +4566,6 @@ Nothing to set up. Just tell me what you're working on and we'll go from there.`
 
 
               <div className="relative mx-auto w-full max-w-3xl">
-                
-                <ProUpsellModal />
                 <div data-tour="composer">
 
 
