@@ -2169,6 +2169,48 @@ export type Database = {
         }
         Relationships: []
       }
+      external_subscription_api_keys: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          key_hash: string
+          key_prefix: string
+          last_used_at: string | null
+          name: string
+          notes: string | null
+          updated_at: string
+          usage_count: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          key_hash: string
+          key_prefix: string
+          last_used_at?: string | null
+          name: string
+          notes?: string | null
+          updated_at?: string
+          usage_count?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          key_hash?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          name?: string
+          notes?: string | null
+          updated_at?: string
+          usage_count?: number
+        }
+        Relationships: []
+      }
       fal_image_models: {
         Row: {
           api_version: string
@@ -7444,6 +7486,10 @@ export type Database = {
           tier_name: string
         }[]
       }
+      get_user_subscription_status: {
+        Args: { p_email?: string; p_user_id?: string }
+        Returns: Json
+      }
       get_workspace_invite_details: { Args: { p_token: string }; Returns: Json }
       has_unlimited_plan: { Args: { p_user_id: string }; Returns: boolean }
       is_conversation_member: {
@@ -7548,6 +7594,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      verify_external_api_key: { Args: { p_key_hash: string }; Returns: string }
       workspace_accept_invite: { Args: { p_token: string }; Returns: Json }
       workspace_apply_topup: {
         Args: {
