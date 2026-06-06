@@ -341,6 +341,9 @@ const ChatPage = () => {
   const [sidebarCollapsed] = useSidebarCollapsed();
   const [plusMenuOpen, setPlusMenuOpen] = useState(false);
   const [plusExpanded, setPlusExpanded] = useState(false);
+  // Dynamic trending suggestions per selected agent. Re-rolled on each agent change.
+  const [trendingItems, setTrendingItems] = useState<string[]>([]);
+  const [trendingAgentId, setTrendingAgentId] = useState<string | null>(null);
   // Stable greeting per chat-page mount (random index + random accent color)
   const [mobileGreeting] = useState(() => Math.floor(Math.random() * 8));
   const [mobileGreetingColor] = useState(() => Math.floor(Math.random() * 8));
