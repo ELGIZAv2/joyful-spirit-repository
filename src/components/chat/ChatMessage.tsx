@@ -710,6 +710,7 @@ const ChatMessage = ({ role, content, messageIndex, isStreaming, isThinking, ima
               onTouchStart={handleLongPressStart}
               onTouchEnd={clearLongPress}
               onTouchCancel={clearLongPress}
+              onClick={(e) => { e.stopPropagation(); setMenuOpen((v) => !v); }}
               style={{
                 background: "var(--user-bubble, #2563eb)",
                 color: "var(--user-bubble-text, #ffffff)",
