@@ -741,25 +741,24 @@ const ChatMessage = ({ role, content, messageIndex, isStreaming, isThinking, ima
               <>
                 <div className="fixed inset-0 z-40" onClick={closeMenu} onTouchStart={closeMenu} />
                 <div
-                  className={
-                    content.length > 160 || content.includes("\n")
-                      ? "absolute right-0 top-full mt-2 z-50 ios-fab rounded-full flex items-stretch p-1 gap-0.5 animate-in fade-in slide-in-from-top-1 duration-150"
-                      : "absolute right-full top-1/2 -translate-y-1/2 mr-2 z-50 ios-fab rounded-full flex items-stretch p-1 gap-0.5 animate-in fade-in slide-in-from-right-1 duration-150"
-                  }
+                  role="menu"
+                  className="absolute right-0 top-full mt-2 z-50 min-w-[180px] rounded-[22px] bg-neutral-900/95 dark:bg-neutral-900/95 backdrop-blur-xl shadow-[0_20px_50px_-10px_rgba(0,0,0,0.55)] ring-1 ring-white/10 p-1.5 flex flex-col animate-in fade-in zoom-in-95 slide-in-from-top-1 duration-150"
                 >
                   <button
                     onClick={async (e) => { e.stopPropagation(); await handleCopy(); closeMenu(); }}
-                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-foreground active:bg-foreground/10 transition-colors"
+                    className="flex items-center justify-between gap-4 px-4 py-2.5 rounded-2xl text-white/95 hover:bg-white/[0.08] active:bg-white/[0.12] transition-colors"
+                    role="menuitem"
                   >
-                    <Copy className="w-3.5 h-3.5 text-foreground/85" strokeWidth={1.8} />
-                    <span className="text-[12px] font-medium">Copy</span>
+                    <span className="text-[15px] font-normal">Copy</span>
+                    <Copy className="w-[18px] h-[18px] text-white/95" strokeWidth={1.8} />
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleEditAction(); closeMenu(); }}
-                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-foreground active:bg-foreground/10 transition-colors"
+                    className="flex items-center justify-between gap-4 px-4 py-2.5 rounded-2xl text-white/95 hover:bg-white/[0.08] active:bg-white/[0.12] transition-colors"
+                    role="menuitem"
                   >
-                    <Pencil className="w-3.5 h-3.5 text-foreground/85" strokeWidth={1.8} />
-                    <span className="text-[12px] font-medium">Edit</span>
+                    <span className="text-[15px] font-normal">Edit</span>
+                    <Pencil className="w-[18px] h-[18px] text-white/95" strokeWidth={1.8} />
                   </button>
                 </div>
               </>
