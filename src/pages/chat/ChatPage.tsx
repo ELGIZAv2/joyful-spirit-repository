@@ -4511,27 +4511,6 @@ Nothing to set up. Just tell me what you're working on and we'll go from there.`
         >
             <div className="max-w-3xl mx-auto space-y-2 pointer-events-auto">
               {/* Quick mode toggles removed — chip shown elsewhere */}
-              <AnimatePresence>
-                {selectedAgent && chatMode === "normal" && selectedAgent.id !== "docs" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 8 }}
-                    className="flex items-center"
-                  >
-                    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium backdrop-blur-sm border border-border/30 ${selectedAgent.bg} ${selectedAgent.color}`}>
-                      {(() => { const Icon = selectedAgent.icon; return <Icon className="w-3.5 h-3.5" />; })()}
-                      <span>{selectedAgent.label}</span>
-                      <button
-                        onClick={() => { setSelectedAgent(null); setSelectedModel(null); }}
-                        className="ml-0.5 p-0.5 rounded-full hover:bg-accent/50 transition-colors"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
 
               {/* Learning quick-tools row removed — everything happens inside chat */}
 
