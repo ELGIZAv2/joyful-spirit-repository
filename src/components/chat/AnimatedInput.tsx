@@ -27,6 +27,7 @@ interface AnimatedInputProps {
   onQuestionAnswer?: (answer: string) => void;
   onQuestionSkip?: () => void;
   activeAgent?: string | null;
+  activeAgentDef?: AgentDef | null;
   onAgentSelect?: (agent: AgentDef) => void;
   onAgentRemove?: () => void;
   mentionCategories?: string[];
@@ -47,7 +48,7 @@ const DEFAULT_PLACEHOLDERS = [
 
 
 
-const AnimatedInput = ({ value, onChange, onSend, onCancel, onPlusClick, disabled, isLoading, placeholders, pendingQuestions, onQuestionAnswer, onQuestionSkip, activeAgent, onAgentSelect, onAgentRemove, mentionCategories, selectedModel, onModelSelect, onModelRemove, accentMode, headerSlot, inlineSlot }: AnimatedInputProps) => {
+const AnimatedInput = ({ value, onChange, onSend, onCancel, onPlusClick, disabled, isLoading, placeholders, pendingQuestions, onQuestionAnswer, onQuestionSkip, activeAgent, activeAgentDef, onAgentSelect, onAgentRemove, mentionCategories, selectedModel, onModelSelect, onModelRemove, accentMode, headerSlot, inlineSlot }: AnimatedInputProps) => {
   const deferredValue = useDeferredValue(value);
   const items = useMemo(() => placeholders && placeholders.length > 0 ? placeholders : DEFAULT_PLACEHOLDERS, [placeholders]);
   const [placeholderIndex, setPlaceholderIndex] = useState(() => Math.floor(Math.random() * items.length));
