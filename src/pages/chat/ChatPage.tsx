@@ -24,6 +24,7 @@ import ChatTour from "@/components/chat/ChatTour";
 import ThinkingLoader from "@/components/chat/ThinkingLoader";
 import FancyButton from "@/components/branding/FancyButton";
 import { AGENTS, type AgentDef, type AgentModel } from "@/lib/agentRegistry";
+import { getTrendingFor } from "@/lib/trendingSuggestions";
 
 import { streamChat, GUEST_QUOTA_ERROR } from "@/lib/streamChat";
 import { addActiveChatJob, removeActiveChatJob, getActiveChatJobs, hydrateActiveChatJobs } from "@/lib/jobs/chatResume";
