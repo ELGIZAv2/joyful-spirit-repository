@@ -4734,6 +4734,11 @@ Nothing to set up. Just tell me what you're working on and we'll go from there.`
                   onQuestionAnswer={handleQuestionAnswer}
                   onQuestionSkip={handleQuestionSkip}
                   activeAgent={chatMode !== "normal" ? chatMode : (selectedAgent?.id || null)}
+                  activeAgentDef={
+                    chatMode !== "normal"
+                      ? AGENTS.find((a) => a.id === (chatMode === "deep-research" ? "deep-research" : chatMode)) || null
+                      : selectedAgent
+                  }
                   onAgentSelect={(agent: AgentDef) => {
                     if (agent.id === "operator") {
                       tryActivateMegsyOs();
