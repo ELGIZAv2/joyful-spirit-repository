@@ -27,6 +27,7 @@ interface AnimatedInputProps {
   onQuestionAnswer?: (answer: string) => void;
   onQuestionSkip?: () => void;
   activeAgent?: string | null;
+  activeAgentDef?: AgentDef | null;
   onAgentSelect?: (agent: AgentDef) => void;
   onAgentRemove?: () => void;
   mentionCategories?: string[];
@@ -47,7 +48,7 @@ const DEFAULT_PLACEHOLDERS = [
 
 
 
-const AnimatedInput = ({ value, onChange, onSend, onCancel, onPlusClick, disabled, isLoading, placeholders, pendingQuestions, onQuestionAnswer, onQuestionSkip, activeAgent, onAgentSelect, onAgentRemove, mentionCategories, selectedModel, onModelSelect, onModelRemove, accentMode, headerSlot, inlineSlot }: AnimatedInputProps) => {
+const AnimatedInput = ({ value, onChange, onSend, onCancel, onPlusClick, disabled, isLoading, placeholders, pendingQuestions, onQuestionAnswer, onQuestionSkip, activeAgent, activeAgentDef, onAgentSelect, onAgentRemove, mentionCategories, selectedModel, onModelSelect, onModelRemove, accentMode, headerSlot, inlineSlot }: AnimatedInputProps) => {
   const deferredValue = useDeferredValue(value);
   const items = useMemo(() => placeholders && placeholders.length > 0 ? placeholders : DEFAULT_PLACEHOLDERS, [placeholders]);
   const [placeholderIndex, setPlaceholderIndex] = useState(() => Math.floor(Math.random() * items.length));
@@ -363,7 +364,39 @@ const AnimatedInput = ({ value, onChange, onSend, onCancel, onPlusClick, disable
 
 
         {/* Textarea — full width, on top */}
-        <div className="relative px-1">
+        <div className="px-1">
+          {/* Inline service chip — lives inside the input box and pushes the textarea down */}
+          <AnimatePresence>
+            {activeAgentDef && (
+              <motion.div
+                key={activeAgentDef.id}
+                initial={{ opacity: 0, y: -4, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: "auto" }}
+                exit={{ opacity: 0, y: -4, height: 0 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+                className="overflow-hidden"
+              >
+                <div className="flex items-center pt-1 pb-1.5">
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-full pl-2.5 pr-1 py-1 text-[12px] font-medium border ${activeAgentDef.bg} ${activeAgentDef.color} border-current/20`}
+                  >
+                    {(() => { const Icon = activeAgentDef.icon; return <Icon className="w-3.5 h-3.5" />; })()}
+                    <span className="leading-none">{activeAgentDef.label}</span>
+                    <button
+                      type="button"
+                      onClick={onAgentRemove}
+                      className="ml-0.5 inline-flex items-center justify-center w-4 h-4 rounded-full hover:bg-current/15 transition-colors"
+                      aria-label={`Remove ${activeAgentDef.label}`}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className="relative">
           {!value && displayedPlaceholder && (
             <div
               aria-hidden
@@ -393,6 +426,7 @@ const AnimatedInput = ({ value, onChange, onSend, onCancel, onPlusClick, disable
             className="relative w-full bg-transparent border-none outline-none resize-none text-[15.5px] md:text-sm text-foreground py-1.5 px-1 leading-relaxed md:py-2"
             style={{ minHeight: "38px" }}
           />
+          </div>
         </div>
 
         {/* Bottom controls row */}
