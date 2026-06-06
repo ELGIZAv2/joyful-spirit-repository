@@ -364,7 +364,7 @@ const AnimatedInput = ({ value, onChange, onSend, onCancel, onPlusClick, disable
 
 
         {/* Textarea — full width, on top */}
-        <div className="relative px-1">
+        <div className="px-1">
           {/* Inline service chip — lives inside the input box and pushes the textarea down */}
           <AnimatePresence>
             {activeAgentDef && (
@@ -396,6 +396,7 @@ const AnimatedInput = ({ value, onChange, onSend, onCancel, onPlusClick, disable
             )}
           </AnimatePresence>
 
+          <div className="relative">
           {!value && displayedPlaceholder && (
             <div
               aria-hidden
@@ -425,6 +426,7 @@ const AnimatedInput = ({ value, onChange, onSend, onCancel, onPlusClick, disable
             className="relative w-full bg-transparent border-none outline-none resize-none text-[15.5px] md:text-sm text-foreground py-1.5 px-1 leading-relaxed md:py-2"
             style={{ minHeight: "38px" }}
           />
+          </div>
         </div>
 
         {/* Bottom controls row */}
