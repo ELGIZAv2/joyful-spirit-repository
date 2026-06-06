@@ -4620,6 +4620,53 @@ Nothing to set up. Just tell me what you're working on and we'll go from there.`
                     >Cancel</button>
                   </div>
                 )}
+                <AnimatePresence>
+                  {messages.length === 0 && !loadingMessages && input.length === 0 && editingIndex === null && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 4 }}
+                      transition={{ duration: 0.18, ease: "easeOut" }}
+                      className="mb-3 flex flex-col items-start gap-1 px-1"
+                    >
+                      {[
+                        { id: "operator", label: "Use Megsy OS" },
+                        { id: "slides", label: "Create a presentation" },
+                        { id: "deep-research", label: "Run deep research" },
+                      ].map((s) => {
+                        const agent = AGENTS.find((a) => a.id === s.id);
+                        if (!agent) return null;
+                        const Icon = agent.icon;
+                        return (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onClick={() => {
+                              if (agent.id === "operator") {
+                                tryActivateMegsyOs();
+                                return;
+                              }
+                              const modeMap: Record<string, ChatMode> = { "deep-research": "deep-research" };
+                              if (modeMap[agent.id]) {
+                                setSelectedAgent(null);
+                                setSelectedModel(null);
+                                handleModeChange(modeMap[agent.id]);
+                                return;
+                              }
+                              setChatMode("normal");
+                              setSelectedAgent(agent);
+                              setSelectedModel(null);
+                            }}
+                            className="group flex items-center gap-3 py-1.5 text-[14px] text-foreground/85 hover:text-foreground transition-colors"
+                          >
+                            <Icon className={`w-[18px] h-[18px] ${agent.color} opacity-90 group-hover:opacity-100 transition-opacity`} />
+                            <span>{s.label}</span>
+                          </button>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                 <AnimatedInput
                   value={input}
                   onChange={setInput}
