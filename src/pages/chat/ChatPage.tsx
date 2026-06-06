@@ -4603,53 +4603,125 @@ Nothing to set up. Just tell me what you're working on and we'll go from there.`
                     >Cancel</button>
                   </div>
                 )}
-                <AnimatePresence>
-                  {messages.length === 0 && !loadingMessages && input.length === 0 && editingIndex === null && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 4 }}
-                      transition={{ duration: 0.18, ease: "easeOut" }}
-                      className="mb-3 flex flex-col items-start gap-1 px-1"
-                    >
-                      {[
-                        { id: "operator", label: "Use Megsy OS" },
-                        { id: "slides", label: "Create a presentation" },
-                        { id: "deep-research", label: "Run deep research" },
-                      ].map((s) => {
-                        const agent = AGENTS.find((a) => a.id === s.id);
-                        if (!agent) return null;
-                        const Icon = agent.icon;
-                        return (
-                          <button
-                            key={s.id}
-                            type="button"
-                            onClick={() => {
-                              if (agent.id === "operator") {
-                                tryActivateMegsyOs();
-                                return;
-                              }
-                              const modeMap: Record<string, ChatMode> = { "deep-research": "deep-research" };
-                              if (modeMap[agent.id]) {
-                                setSelectedAgent(null);
-                                setSelectedModel(null);
-                                handleModeChange(modeMap[agent.id]);
-                                return;
-                              }
-                              setChatMode("normal");
-                              setSelectedAgent(agent);
-                              setSelectedModel(null);
-                            }}
-                            className="group flex items-center gap-3 py-1.5 text-[14px] text-foreground/85 hover:text-foreground transition-colors"
-                          >
-                            <Icon className={`w-[18px] h-[18px] ${agent.color} opacity-90 group-hover:opacity-100 transition-opacity`} />
-                            <span>{s.label}</span>
-                          </button>
-                        );
-                      })}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {(() => {
+                  // Resolve the currently-active agent (selectedAgent OR a chatMode like deep-research/operator/learning/shopping).
+                  const modeAgentMap: Record<string, string> = {
+                    "deep-research": "deep-research",
+                    operator: "operator",
+                    learning: "learning",
+                    shopping: "shopping",
+                  };
+                  const effectiveAgentId =
+                    chatMode !== "normal" ? modeAgentMap[chatMode] || null : selectedAgent?.id || null;
+                  const effectiveAgent = effectiveAgentId ? AGENTS.find((a) => a.id === effectiveAgentId) : null;
+
+                  // Re-roll trending list whenever the active agent changes.
+                  if (effectiveAgentId && effectiveAgentId !== trendingAgentId) {
+                    queueMicrotask(() => {
+                      setTrendingAgentId(effectiveAgentId);
+                      setTrendingItems(getTrendingFor(effectiveAgentId, 4));
+                    });
+                  } else if (!effectiveAgentId && trendingAgentId) {
+                    queueMicrotask(() => {
+                      setTrendingAgentId(null);
+                      setTrendingItems([]);
+                    });
+                  }
+
+                  const showEmptyHelpers =
+                    messages.length === 0 && !loadingMessages && input.length === 0 && editingIndex === null;
+
+                  return (
+                    <AnimatePresence mode="wait">
+                      {showEmptyHelpers && effectiveAgent && trendingItems.length > 0 && (
+                        <motion.div
+                          key={`trending-${effectiveAgent.id}`}
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 4 }}
+                          transition={{ duration: 0.18, ease: "easeOut" }}
+                          className="mb-3 flex flex-col items-stretch gap-0.5 px-1"
+                        >
+                          {trendingItems.map((item, i) => (
+                            <motion.div
+                              key={`${item}-${i}`}
+                              initial={{ opacity: 0, y: 4 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, x: -8 }}
+                              transition={{ delay: i * 0.04, duration: 0.2 }}
+                              className="group flex items-center gap-3 py-1.5 text-[14px] text-foreground/85"
+                            >
+                              <TrendingUp className="w-[16px] h-[16px] text-primary/80 shrink-0" strokeWidth={2.2} />
+                              <button
+                                type="button"
+                                onClick={() => setInput(item)}
+                                className="flex-1 text-left hover:text-foreground transition-colors truncate"
+                              >
+                                {item}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setTrendingItems((prev) => prev.filter((_, idx) => idx !== i))
+                                }
+                                className="shrink-0 w-6 h-6 inline-flex items-center justify-center rounded-full text-muted-foreground/70 hover:text-foreground hover:bg-foreground/10 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                aria-label="Dismiss suggestion"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </motion.div>
+                          ))}
+                        </motion.div>
+                      )}
+                      {showEmptyHelpers && !effectiveAgent && (
+                        <motion.div
+                          key="services"
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 4 }}
+                          transition={{ duration: 0.18, ease: "easeOut" }}
+                          className="mb-3 flex flex-col items-start gap-1 px-1"
+                        >
+                          {[
+                            { id: "operator", label: "Use Megsy OS" },
+                            { id: "slides", label: "Create a presentation" },
+                            { id: "deep-research", label: "Run deep research" },
+                          ].map((s) => {
+                            const agent = AGENTS.find((a) => a.id === s.id);
+                            if (!agent) return null;
+                            const Icon = agent.icon;
+                            return (
+                              <button
+                                key={s.id}
+                                type="button"
+                                onClick={() => {
+                                  if (agent.id === "operator") {
+                                    tryActivateMegsyOs();
+                                    return;
+                                  }
+                                  const modeMap: Record<string, ChatMode> = { "deep-research": "deep-research" };
+                                  if (modeMap[agent.id]) {
+                                    setSelectedAgent(null);
+                                    setSelectedModel(null);
+                                    handleModeChange(modeMap[agent.id]);
+                                    return;
+                                  }
+                                  setChatMode("normal");
+                                  setSelectedAgent(agent);
+                                  setSelectedModel(null);
+                                }}
+                                className="group flex items-center gap-3 py-1.5 text-[14px] text-foreground/85 hover:text-foreground transition-colors"
+                              >
+                                <Icon className={`w-[18px] h-[18px] ${agent.color} opacity-90 group-hover:opacity-100 transition-opacity`} />
+                                <span>{s.label}</span>
+                              </button>
+                            );
+                          })}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  );
+                })()}
                 <AnimatedInput
                   value={input}
                   onChange={setInput}
