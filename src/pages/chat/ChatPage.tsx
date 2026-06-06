@@ -4,7 +4,7 @@ import { createPortal } from "react-dom";
 import { Highlighter } from "@/components/magicui/highlighter";
 import UnlockProButton from "@/components/branding/UnlockProButton";
 import { motion, AnimatePresence, useMotionValue, useTransform, animate, type PanInfo } from "framer-motion";
-import { Menu, Plus, Camera, Image, Images, FileUp, X, GraduationCap, ShoppingCart, ArrowDown, ChevronDown, ChevronLeft, Star, Pencil, Trash2, FolderPlus, Globe, Lock, Share2, MoreVertical, MoreHorizontal, Pin, UserPlus, Copy, Mail, Link2, Users, Loader2, NotebookPen, ClipboardList, CalendarDays, Timer, Wrench, Lightbulb, Mic2, Sparkles, BookOpen, Check, Cpu, Bot, Atom, Music2, Layers, ClipboardCheck, Volume2, Play, Telescope, Presentation, FileText, Projector, ScrollText, Workflow, LayoutTemplate, Microscope, Wand2, MessageSquare } from "lucide-react";
+import { Menu, Plus, Camera, Image, Images, FileUp, X, GraduationCap, ShoppingCart, ArrowDown, ChevronDown, ChevronLeft, Star, Pencil, Trash2, FolderPlus, Globe, Lock, Share2, MoreVertical, MoreHorizontal, Pin, UserPlus, Copy, Mail, Link2, Users, Loader2, NotebookPen, ClipboardList, CalendarDays, Timer, Wrench, Lightbulb, Mic2, Sparkles, BookOpen, Check, Cpu, Bot, Atom, Music2, Layers, ClipboardCheck, Volume2, Play, Telescope, Presentation, FileText, Projector, ScrollText, Workflow, LayoutTemplate, Microscope, Wand2, MessageSquare, TrendingUp } from "lucide-react";
 import { SiGmail, SiGoogledrive, SiGooglecalendar, SiSlack, SiNotion, SiGithub } from "react-icons/si";
 import { toast } from "sonner";
 import { useNavigate, useLocation } from "react-router-dom";
